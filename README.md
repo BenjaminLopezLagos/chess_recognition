@@ -1,0 +1,2 @@
+# use python 3.10!
+## WIP program that, after receiving a chess board image, generates a FEN string for an AI player (using stockfish). Ideally, it should work with a physical board but that's still in progress.
