@@ -1,3 +1,6 @@
 .venv
 venv
+.conda
+board_imgs
 kaggle.json
+__pycache__

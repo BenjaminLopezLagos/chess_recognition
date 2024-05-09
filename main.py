@@ -1,4 +1,5 @@
 import cv2
+import piece_detector
 
 def makeGrid(img):
     for i in range(9):
@@ -28,45 +29,83 @@ def get_points(img):
             squares.append([top_left, top_right, bottom_left, bottom_right])    
     return squares
 
-def generate_fen_string(chess_board):
-    pass
-
-def main():
-    chess_cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] 
-    chess_rows = list(range(1,9))
+# generates a dict containing a chess positions as key and its respective coordinates as value
+def generate_board(squares, img):
     chess_board = {}
-    path = 'board.jpg'
-    img = cv2.imread(path)
-    resized = cv2.resize(img, (400, 400))
-    resized = makeGrid(resized)
-    squares = get_points(resized)
-
-    row_pos = len(chess_rows) - 1
+    cols = list(map(chr, range(ord('a'), ord('h')+1)))
+    rows = list(range(1,9))
+    row_pos = len(rows) - 1
     col_pos = 0
     for square in squares:
         if row_pos < 0:
-            row_pos = len(chess_rows) - 1
+            row_pos = len(rows) - 1
             col_pos += 1
         print(square)
         print((row_pos, col_pos))
+        
         x_start = square[0][0]
         x_end = square[1][0]
         y_start = square[0][1]
         y_end = square[2][1]
-        cropImage = resized[ y_start: y_end , x_start: x_end] 
-
-        current_board_position = chess_cols[col_pos] + str(chess_rows[row_pos])
+        cropImage = img[ y_start: y_end , x_start: x_end]
+        piece = piece_detector.predict_piece(cropImage)
+        current_board_position = cols[col_pos] + str(rows[row_pos])
         #chess_board[current_board_position] = cropImage # so i don't have to crop later
-        chess_board[current_board_position] = square # stores coordinates but i have to crop the image
+        chess_board[current_board_position] = piece
         #cv2.imwrite('./board_imgs/'+current_board_position+'_board.png', cropImage)
 
         row_pos -= 1
 
+    return chess_board
+
+#only works on a single row
+def chess_row_to_fen(chess_row: list):
+    none_count = 0
+    fen_list = []
+    for i in range(len(chess_row)):
+        if chess_row[i] == 'none':
+            none_count += 1
+        else:
+            if none_count > 0:
+                fen_list.append(none_count)
+                none_count = 0
+            fen_list.append(chess_row[i])
+    if none_count > 0:
+        fen_list.append(none_count)
+    return ''.join(map(str, fen_list))
+
+def generate_fen(chess_board: dict):
+    fen_rows = []
+    cols = list(map(chr, range(ord('a'), ord('h')+1)))
+    rows = list(range(1,9))
+    rows.sort(reverse=True)
+
+    for row in rows:
+        current_row = []
+        for col in cols:
+            pos = col + str(row)
+            current_row.append(chess_board[pos])
+        fen_current_row = chess_row_to_fen(current_row)
+        fen_rows.append(fen_current_row)
+
+    return '/'.join(fen_rows)
+
+
+def main():
+    path = 'tableronnmnm.png'
+    img = cv2.imread(path)
+    resized = cv2.resize(img, (960, 960))
+    #resized = makeGrid(resized)
+    squares = get_points(resized)
+    chess_board = generate_board(squares, resized)
+
+    fen = generate_fen(chess_board)
+    print(fen)
     print(len(squares))
     print(chess_board)
     #resized = cv2.line(resized, (0,0), (50,0), color=(160, 42, 240), thickness=5)
     #cv2.imshow("number 1", img)
-    cv2.imshow("number 1 resized", resized)
+    cv2.imshow("board", img)
     cv2.waitKey(0)
     cv2.destroyAllWindows
 
