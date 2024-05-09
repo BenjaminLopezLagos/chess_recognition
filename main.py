@@ -29,7 +29,7 @@ def get_points(img):
             squares.append([top_left, top_right, bottom_left, bottom_right])    
     return squares
 
-# generates a dict containing a chess positions as key and its respective coordinates as value
+# generates a dict containing a chess positions as key and its piece as value
 def generate_board(squares, img):
     chess_board = {}
     cols = list(map(chr, range(ord('a'), ord('h')+1)))
@@ -58,7 +58,6 @@ def generate_board(squares, img):
 
     return chess_board
 
-#only works on a single row
 def chess_row_to_fen(chess_row: list):
     none_count = 0
     fen_list = []
