@@ -1,5 +1,8 @@
 import cv2
 import piece_detector
+import chess
+from stockfish import Stockfish
+from itertools import islice
 
 def makeGrid(img):
     for i in range(9):
@@ -73,7 +76,7 @@ def chess_row_to_fen(chess_row: list):
         fen_list.append(none_count)
     return ''.join(map(str, fen_list))
 
-def generate_fen(chess_board: dict):
+def generate_fen(chess_board: dict, current_turn: str = 'w'):
     fen_rows = []
     cols = list(map(chr, range(ord('a'), ord('h')+1)))
     rows = list(range(1,9))
@@ -87,21 +90,50 @@ def generate_fen(chess_board: dict):
         fen_current_row = chess_row_to_fen(current_row)
         fen_rows.append(fen_current_row)
 
-    return '/'.join(fen_rows)
+    fen = '/'.join(fen_rows)
+    return ' '.join([fen, current_turn])
 
+
+def get_piece_location_change_from_move(move: str):
+    cleaned_move = move
+    if len(move) > 4:
+        cleaned_move = move[:-1]
+    res_first = ''.join(islice(cleaned_move, None, len(cleaned_move) // 2))
+    res_second = ''.join(islice(cleaned_move, len(cleaned_move) // 2, None))
+    
+    return {'from': res_first, 'to': res_second}
 
 def main():
-    path = 'tableronnmnm.png'
+    stockfish=Stockfish("notebook using stockfish/stockfish/stockfish-windows-x86-64-avx2.exe")
+    stockfish.set_depth(20)#How deep the AI looks
+    stockfish.set_skill_level(20)#Highest rank stockfish
+    stockfish.get_parameters()
+
+    path = 'test_board.png'
     img = cv2.imread(path)
     resized = cv2.resize(img, (960, 960))
     #resized = makeGrid(resized)
     squares = get_points(resized)
     chess_board = generate_board(squares, resized)
 
-    fen = generate_fen(chess_board)
+    current_turn = 'w'
+
+    print('before move')
+    fen = generate_fen(chess_board, current_turn)
     print(fen)
     print(len(squares))
     print(chess_board)
+    
+    print('after move. now using stockfish')
+    board = chess.Board(fen)
+    stockfish.set_fen_position(board.fen())
+    move = stockfish.get_best_move()
+    print(get_piece_location_change_from_move(move))
+    board.push_san(move)
+
+    print(board)
+    print(board.fen())
+
     #resized = cv2.line(resized, (0,0), (50,0), color=(160, 42, 240), thickness=5)
     #cv2.imshow("number 1", img)
     cv2.imshow("board", img)
