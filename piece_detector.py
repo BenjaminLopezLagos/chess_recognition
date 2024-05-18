@@ -5,62 +5,67 @@ import operator
 from PIL import Image
 import cv2
 
-image_size = (120, 120)
-class_names = ['black-bishop',
- 'black-king',
- 'black-knight',
- 'black-pawn',
- 'black-queen',
- 'black-rook',
- 'none',
- 'white-bishop',
- 'white-king',
- 'white-knight',
- 'white-pawn',
- 'white-queen',
- 'white-rook']
+print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 
+image_size = (85, 85)
+class_names_pieces = ['bishop', 'king', 'knight', 'none', 'pawn', 'queen', 'rook']
+class_names_colors = ['black', 'white']
 fen_classes = {
     # black pieces
-    class_names[0]: 'b',
-    class_names[1]: 'k',
-    class_names[2]: 'n',
-    class_names[3]: 'p',
-    class_names[4]: 'q',
-    class_names[5]: 'r',
-    # not fen exception
-    class_names[6]: 'none',
-    # white pieces
-    class_names[7]: 'B',
-    class_names[8]: 'K',
-    class_names[9]: 'N',
-    class_names[10]: 'P',
-    class_names[11]: 'Q',
-    class_names[12]: 'R',
+    class_names_pieces[0]: 'b',
+    class_names_pieces[1]: 'k',
+    class_names_pieces[2]: 'n',
+    class_names_pieces[3]: 'none',
+    class_names_pieces[4]: 'p',
+    class_names_pieces[5]: 'q',
+    class_names_pieces[6]: 'r',
 }
 
-def predict_piece(img_array, size = (120, 120)):
+def predict_color(img_array, size = (85, 85)):
     img_array = cv2.resize(img_array, size)
     img_array = tf.expand_dims(img_array, 0)  # Create batch axis
 
-    predictions = model.predict(img_array)
+    predictions = model_colors.predict(img_array)
     #score = predictions[0]
     print(predictions)
     max_value = max(predictions)
-    print(predictions.argmax())
-    predicted_class = class_names[predictions.argmax()]
-    print(predicted_class)
+    predicted_class = class_names_colors[predictions.argmax()]
+    return predicted_class
+
+def predict_piece(img_array, size = (85, 85)):
+    img_array = cv2.resize(img_array, size)
+    img_array = tf.expand_dims(img_array, 0)  # Create batch axis
+
+    predictions = model_pieces.predict(img_array)
+    #score = predictions[0]
+    print(predictions)
+    max_value = max(predictions)
+    predicted_class = class_names_pieces[predictions.argmax()]  
+    return  predicted_class
+
+def get_piece_and_color(img_array):
+    piece = fen_classes[predict_piece(img_array)]
+    color = predict_color(img_array)
+
+    if piece == 'none':
+        return piece
     
-    return  fen_classes[predicted_class]
+    if color == 'white':
+        return piece.upper()
+    
+    return piece
+        
 
 print(tf.__version__)
 
-model = tf.keras.models.load_model('./model.h5')
-model.summary()
+model_pieces = tf.keras.models.load_model('./model_pieces.h5')
+model_pieces.summary()
+model_colors = tf.keras.models.load_model('./model_color.h5')
+model_colors.summary()
 
 img = keras.preprocessing.image.load_img(
-    "black-bishop_original_Captura.PNG_0dbe4368-b208-4820-92aa-bf81f9f5effb.PNG", target_size=image_size
+    "Captura de pantalla 2024-05-18 181413.png", target_size=image_size
 )
 img_array = keras.preprocessing.image.img_to_array(img)
-print(predict_piece(img_array))
+print(get_piece_and_color(img_array))
 

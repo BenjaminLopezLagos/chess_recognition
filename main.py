@@ -51,7 +51,7 @@ def generate_board(squares, img):
         y_start = square[0][1]
         y_end = square[2][1]
         cropImage = img[ y_start: y_end , x_start: x_end]
-        piece = piece_detector.predict_piece(cropImage)
+        piece = piece_detector.get_piece_and_color(cropImage)
         current_board_position = cols[col_pos] + str(rows[row_pos])
         #chess_board[current_board_position] = cropImage # so i don't have to crop later
         chess_board[current_board_position] = piece
@@ -93,7 +93,6 @@ def generate_fen(chess_board: dict, current_turn: str = 'w'):
     fen = '/'.join(fen_rows)
     return ' '.join([fen, current_turn])
 
-
 def get_piece_location_change_from_move(move: str):
     cleaned_move = move
     if len(move) > 4:
@@ -109,30 +108,38 @@ def main():
     stockfish.set_skill_level(20)#Highest rank stockfish
     stockfish.get_parameters()
 
-    path = 'test_board.png'
+    path = 'Captura de pantalla 2024-05-18 180644.png'
+
     img = cv2.imread(path)
     resized = cv2.resize(img, (960, 960))
     #resized = makeGrid(resized)
     squares = get_points(resized)
     chess_board = generate_board(squares, resized)
 
-    current_turn = 'w'
+    #current_turn = 'w'
 
     print('before move')
-    fen = generate_fen(chess_board, current_turn)
+    fen = generate_fen(chess_board)
     print(fen)
     print(len(squares))
     print(chess_board)
-    
-    print('after move. now using stockfish')
     board = chess.Board(fen)
+    print(board)
+
+    print('after move. now using stockfish')
     stockfish.set_fen_position(board.fen())
     move = stockfish.get_best_move()
+    print(move)
     print(get_piece_location_change_from_move(move))
-    board.push_san(move)
+    board.push_uci(move)
 
     print(board)
     print(board.fen())
+
+    print('Legal moves:')
+    print(board.legal_moves)
+    user_move = input('')
+    board.push_uci(user_move)
 
     #resized = cv2.line(resized, (0,0), (50,0), color=(160, 42, 240), thickness=5)
     #cv2.imshow("number 1", img)
