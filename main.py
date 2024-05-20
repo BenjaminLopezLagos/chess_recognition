@@ -108,7 +108,7 @@ def main():
     stockfish.set_skill_level(20)#Highest rank stockfish
     stockfish.get_parameters()
 
-    path = 'Captura de pantalla 2024-05-18 180644.png'
+    path = 'WhatsApp Image 2024-05-20 at 14.20.06.jpeg'
 
     img = cv2.imread(path)
     resized = cv2.resize(img, (960, 960))

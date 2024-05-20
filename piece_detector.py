@@ -58,13 +58,13 @@ def get_piece_and_color(img_array):
 
 print(tf.__version__)
 
-model_pieces = tf.keras.models.load_model('./model_pieces.h5')
+model_pieces = tf.keras.models.load_model('./model_pieces_6.h5')
 model_pieces.summary()
 model_colors = tf.keras.models.load_model('./model_color.h5')
 model_colors.summary()
 
 img = keras.preprocessing.image.load_img(
-    "Captura de pantalla 2024-05-18 181413.png", target_size=image_size
+    "WhatsApp Image 2024-05-20 at 13.56.24.jpeg", target_size=image_size
 )
 img_array = keras.preprocessing.image.img_to_array(img)
 print(get_piece_and_color(img_array))
