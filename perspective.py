@@ -12,7 +12,7 @@ def perspective_change(img, points):
     
     return output
 
-
+"""
 img = cv2.imread("resized.jpg")
 points = np.float32([[63,40], [332,41], [12,275], [387,275]])
 
@@ -21,3 +21,4 @@ cv2.waitKey(0)
 
 cv2.imshow("original", img)
 cv2.waitKey(0)
+"""

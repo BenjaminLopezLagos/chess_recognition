@@ -117,15 +117,13 @@ def get_pos_center_coordinates(square_corners, length_px=960, length_cm=28.4):
     
     return center_cm
 
-def main():
+def recognize_board(img):
     stockfish=Stockfish("notebook using stockfish/stockfish/stockfish-windows-x86-64-avx2.exe")
     stockfish.set_depth(20)#How deep the AI looks
     stockfish.set_skill_level(20)#Highest rank stockfish
     stockfish.get_parameters()
 
-    path = 'php4yqazb.png'
-
-    img = cv2.imread(path)
+    #img = cv2.imread(img_path)
     resized = cv2.resize(img, (960, 960))
     #resized = makeGrid(resized)
     squares = get_points(resized)
@@ -163,10 +161,11 @@ def main():
 
     #resized = cv2.line(resized, (0,0), (50,0), color=(160, 42, 240), thickness=5)
     #cv2.imshow("number 1", img)
-    #cv2.imshow("board", resized)
-    #cv2.waitKey(0)
-    #cv2.destroyAllWindows
+    cv2.imshow("board", resized)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows
 
 
 if __name__ == '__main__':
-    main()
+    img = cv2.imread('php4yqazb.png')
+    recognize_board(img)
