@@ -34,7 +34,8 @@ def get_points(img):
 
 # generates a dict containing a chess positions as key and its piece as value
 def generate_board(squares, img):
-    chess_board = {}
+    chess_board_pieces = {}
+    chess_board_squares = {}
     cols = list(map(chr, range(ord('a'), ord('h')+1)))
     rows = list(range(1,9))
     row_pos = len(rows) - 1
@@ -54,12 +55,13 @@ def generate_board(squares, img):
         piece = piece_detector.get_piece_and_color(cropImage)
         current_board_position = cols[col_pos] + str(rows[row_pos])
         #chess_board[current_board_position] = cropImage # so i don't have to crop later
-        chess_board[current_board_position] = piece
+        chess_board_pieces[current_board_position] = piece
+        chess_board_squares[current_board_position] = [x_start, x_end, y_start, y_end]
         #cv2.imwrite('./board_imgs/'+current_board_position+'_board.png', cropImage)
 
         row_pos -= 1
 
-    return chess_board
+    return (chess_board_pieces, chess_board_squares)
 
 def chess_row_to_fen(chess_row: list):
     none_count = 0
@@ -102,27 +104,43 @@ def get_piece_location_change_from_move(move: str):
     
     return {'from': res_first, 'to': res_second}
 
+def get_pos_center_coordinates(square_corners, length_px=960, length_cm=28.4):
+    # para x necesito hacer que la medida sea [-x , 0, +x]
+    x = ((square_corners[0] + square_corners[1]) / 2)  - length_px + (length_px / 2)
+    y = length_px - ((square_corners[2] + square_corners[3]) / 2)
+    center_px = (x, y)
+    print(center_px)
+
+    x_cm = (x *  length_cm) / length_px
+    y_cm = (y *  length_cm) / length_px
+    center_cm = (x_cm, y_cm)
+    
+    return center_cm
+
 def main():
     stockfish=Stockfish("notebook using stockfish/stockfish/stockfish-windows-x86-64-avx2.exe")
     stockfish.set_depth(20)#How deep the AI looks
     stockfish.set_skill_level(20)#Highest rank stockfish
     stockfish.get_parameters()
 
-    path = 'WhatsApp Image 2024-05-20 at 14.20.06.jpeg'
+    path = 'php4yqazb.png'
 
     img = cv2.imread(path)
     resized = cv2.resize(img, (960, 960))
     #resized = makeGrid(resized)
     squares = get_points(resized)
     chess_board = generate_board(squares, resized)
+    board_with_pieces = chess_board[0]
+    board_with_coordinates = chess_board[1]
 
     #current_turn = 'w'
 
     print('before move')
-    fen = generate_fen(chess_board)
+    fen = generate_fen(board_with_pieces)
     print(fen)
     print(len(squares))
-    print(chess_board)
+    print(board_with_pieces)
+    print(board_with_coordinates)
     board = chess.Board(fen)
     print(board)
 
@@ -130,7 +148,9 @@ def main():
     stockfish.set_fen_position(board.fen())
     move = stockfish.get_best_move()
     print(move)
-    print(get_piece_location_change_from_move(move))
+    stockfish_move_pos = get_piece_location_change_from_move(move)
+    stockfish_from = stockfish_move_pos['from']
+    print(get_pos_center_coordinates(board_with_coordinates[stockfish_from])) #testing
     board.push_uci(move)
 
     print(board)
@@ -143,9 +163,9 @@ def main():
 
     #resized = cv2.line(resized, (0,0), (50,0), color=(160, 42, 240), thickness=5)
     #cv2.imshow("number 1", img)
-    cv2.imshow("board", img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows
+    #cv2.imshow("board", resized)
+    #cv2.waitKey(0)
+    #cv2.destroyAllWindows
 
 
 if __name__ == '__main__':
