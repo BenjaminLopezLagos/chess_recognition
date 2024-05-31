@@ -7,7 +7,7 @@ import cv2
 
 print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 
-image_size = (85, 85)
+image_size = (224, 224)
 class_names_pieces = ['bishop', 'king', 'knight', 'none', 'pawn', 'queen', 'rook']
 class_names_colors = ['black', 'white']
 fen_classes = {
@@ -32,7 +32,7 @@ def predict_color(img_array, size = (85, 85)):
     predicted_class = class_names_colors[predictions.argmax()]
     return predicted_class
 
-def predict_piece(img_array, size = (85, 85)):
+def predict_piece(img_array, size = (224, 224)):
     img_array = cv2.resize(img_array, size)
     img_array = tf.expand_dims(img_array, 0)  # Create batch axis
 
@@ -58,13 +58,13 @@ def get_piece_and_color(img_array):
 
 print(tf.__version__)
 
-model_pieces = tf.keras.models.load_model('./model_pieces_6.h5')
+model_pieces = tf.keras.models.load_model('./model_pieces_new.h5')
 model_pieces.summary()
 model_colors = tf.keras.models.load_model('./model_color.h5')
 model_colors.summary()
 
 img = keras.preprocessing.image.load_img(
-    "WhatsApp Image 2024-05-20 at 13.56.24.jpeg", target_size=image_size
+    "WhatsApp Image 2024-05-20 at 14.11.51.jpeg", target_size=image_size
 )
 img_array = keras.preprocessing.image.img_to_array(img)
 print(get_piece_and_color(img_array))

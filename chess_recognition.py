@@ -141,6 +141,7 @@ def recognize_board(img):
     print(board_with_coordinates)
     board = chess.Board(fen)
     print(board)
+    #cv2.imshow("board", resized)
 
     print('after move. now using stockfish')
     stockfish.set_fen_position(board.fen())
@@ -157,15 +158,14 @@ def recognize_board(img):
     print('Legal moves:')
     print(board.legal_moves)
     user_move = input('')
-    board.push_uci(user_move)
+    #board.push_uci(user_move)
 
     #resized = cv2.line(resized, (0,0), (50,0), color=(160, 42, 240), thickness=5)
     #cv2.imshow("number 1", img)
-    cv2.imshow("board", resized)
     cv2.waitKey(0)
     cv2.destroyAllWindows
 
 
 if __name__ == '__main__':
-    img = cv2.imread('php4yqazb.png')
+    img = cv2.imread('php2JxaUR.png')
     recognize_board(img)

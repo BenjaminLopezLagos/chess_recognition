@@ -28,8 +28,8 @@ def main():
         # quitting button you may use any 
         # desired button of your choice 
         if cv2.waitKey(1) & 0xFF == ord('q'):
-            recognize_board(transformed_frame)
-            #print(get_piece_and_color(perspective_change(frame, dots)))
+            #recognize_board(transformed_frame)
+            print(get_piece_and_color(perspective_change(frame, dots)))
             break
     
     # After the loop release the cap object 
