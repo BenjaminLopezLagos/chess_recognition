@@ -4,13 +4,6 @@ import chess
 from stockfish import Stockfish
 from itertools import islice
 
-def makeGrid(img):
-    for i in range(9):
-        img = cv2.line(img, (0, i*50), (400,i*50), color=(160, 42, 240), thickness=1)
-        img = cv2.line(img, (i*50, 0), (i*50, 400), color=(160, 42, 240), thickness=1)
-        print(i)
-    return img
-
 def get_points(img):
     height, width, _ = img.shape
 
@@ -57,7 +50,7 @@ def generate_board(squares, img):
         #chess_board[current_board_position] = cropImage # so i don't have to crop later
         chess_board_pieces[current_board_position] = piece
         chess_board_squares[current_board_position] = [x_start, x_end, y_start, y_end]
-        #cv2.imwrite('./board_imgs/'+current_board_position+'_board.png', cropImage)
+        #cv2.imwrite('./board_imgs/'+current_board_position+'_boarddd.png', cropImage)
 
         row_pos -= 1
 
@@ -102,9 +95,13 @@ def get_piece_location_change_from_move(move: str):
     res_first = ''.join(islice(cleaned_move, None, len(cleaned_move) // 2))
     res_second = ''.join(islice(cleaned_move, len(cleaned_move) // 2, None))
     
-    return {'from': res_first, 'to': res_second}
+    move_details = {'from': res_first, 'to': res_second}
+    if len(move) > 4:
+        move_details['promotion'] = move[-1]
 
-def get_pos_center_coordinates(square_corners, length_px=960, length_cm=28.4):
+    return move_details
+
+def get_pos_center_coordinates(square_corners, length_px=1000, length_cm=25):
     # para x necesito hacer que la medida sea [-x , 0, +x]
     x = ((square_corners[0] + square_corners[1]) / 2)  - length_px + (length_px / 2)
     y = length_px - ((square_corners[2] + square_corners[3]) / 2)
@@ -117,14 +114,14 @@ def get_pos_center_coordinates(square_corners, length_px=960, length_cm=28.4):
     
     return center_cm
 
-def recognize_board(img):
+def recognize_board(img, turn='w'):
     stockfish=Stockfish("notebook using stockfish/stockfish/stockfish-windows-x86-64-avx2.exe")
     stockfish.set_depth(20)#How deep the AI looks
     stockfish.set_skill_level(20)#Highest rank stockfish
     stockfish.get_parameters()
 
     #img = cv2.imread(img_path)
-    resized = cv2.resize(img, (960, 960))
+    resized = cv2.resize(img, (1000, 1000))
     #resized = makeGrid(resized)
     squares = get_points(resized)
     chess_board = generate_board(squares, resized)
@@ -134,15 +131,17 @@ def recognize_board(img):
     #current_turn = 'w'
 
     print('before move')
-    fen = generate_fen(board_with_pieces)
+    fen = generate_fen(board_with_pieces, turn)
     print(fen)
     print(len(squares))
     print(board_with_pieces)
     print(board_with_coordinates)
+    print(get_piece_location_change_from_move('d3d4r')) #testing promotions
     board = chess.Board(fen)
     print(board)
     #cv2.imshow("board", resized)
-
+    
+    """
     print('after move. now using stockfish')
     stockfish.set_fen_position(board.fen())
     move = stockfish.get_best_move()
@@ -159,11 +158,12 @@ def recognize_board(img):
     print(board.legal_moves)
     user_move = input('')
     #board.push_uci(user_move)
+    """
 
     #resized = cv2.line(resized, (0,0), (50,0), color=(160, 42, 240), thickness=5)
     #cv2.imshow("number 1", img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows
+    #cv2.waitKey(0)
+    #cv2.destroyAllWindows
 
 
 if __name__ == '__main__':
