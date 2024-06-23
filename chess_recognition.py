@@ -26,7 +26,10 @@ def get_points(img):
     return squares
 
 # generates a dict containing a chess positions as key and its piece as value
-def generate_board(squares, img):
+def generate_board(img_path):
+    img = cv2.imread(img_path)
+    img = cv2.resize(img, (1000, 1000))
+    squares = get_points(img)
     chess_board_pieces = {}
     chess_board_squares = {}
     cols = list(map(chr, range(ord('a'), ord('h')+1)))
@@ -115,16 +118,9 @@ def get_pos_center_coordinates(square_corners, length_px=1000, length_cm=25):
     return center_cm
 
 def recognize_board(img, turn='w'):
-    stockfish=Stockfish("notebook using stockfish/stockfish/stockfish-windows-x86-64-avx2.exe")
-    stockfish.set_depth(20)#How deep the AI looks
-    stockfish.set_skill_level(20)#Highest rank stockfish
-    stockfish.get_parameters()
-
     #img = cv2.imread(img_path)
-    resized = cv2.resize(img, (1000, 1000))
     #resized = makeGrid(resized)
-    squares = get_points(resized)
-    chess_board = generate_board(squares, resized)
+    chess_board = generate_board(img)
     board_with_pieces = chess_board[0]
     board_with_coordinates = chess_board[1]
 
@@ -133,7 +129,6 @@ def recognize_board(img, turn='w'):
     print('before move')
     fen = generate_fen(board_with_pieces, turn)
     print(fen)
-    print(len(squares))
     print(board_with_pieces)
     print(board_with_coordinates)
     print(get_piece_location_change_from_move('d3d4r')) #testing promotions
@@ -167,5 +162,5 @@ def recognize_board(img, turn='w'):
 
 
 if __name__ == '__main__':
-    img = cv2.imread('php2JxaUR.png')
+    img = 'php2JxaUR.png'
     recognize_board(img)
