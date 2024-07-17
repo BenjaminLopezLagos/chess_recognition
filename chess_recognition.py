@@ -54,7 +54,7 @@ def generate_board(img):
         #chess_board[current_board_position] = cropImage # so i don't have to crop later
         chess_board_pieces[current_board_position] = piece
         chess_board_squares[current_board_position] = [x_start, x_end, y_start, y_end]
-        cv2.imwrite('./board_imgs/'+current_board_position+'_boarddd.png', cropImage)
+        #cv2.imwrite('./board_imgs/'+current_board_position+'_boarddd.png', cropImage)
 
         row_pos -= 1
 
