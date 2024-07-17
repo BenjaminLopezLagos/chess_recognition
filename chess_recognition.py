@@ -26,8 +26,9 @@ def get_points(img):
     return squares
 
 # generates a dict containing a chess positions as key and its piece as value
-def generate_board(img_path):
-    img = cv2.imread(img_path)
+def generate_board(img):
+    if isinstance(img, str) is True:
+        img = img = cv2.imread(img)
     img = cv2.resize(img, (1000, 1000))
     squares = get_points(img)
     chess_board_pieces = {}
@@ -53,7 +54,7 @@ def generate_board(img_path):
         #chess_board[current_board_position] = cropImage # so i don't have to crop later
         chess_board_pieces[current_board_position] = piece
         chess_board_squares[current_board_position] = [x_start, x_end, y_start, y_end]
-        #cv2.imwrite('./board_imgs/'+current_board_position+'_boarddd.png', cropImage)
+        cv2.imwrite('./board_imgs/'+current_board_position+'_boarddd.png', cropImage)
 
         row_pos -= 1
 
