@@ -13,6 +13,17 @@ import chess_recognition
 from stockfish import Stockfish
 import numpy as np
 import json
+import camera_setup
+
+def take_picture(camera: int = 1):
+    vid = cv2.VideoCapture(camera)
+    current_frame = 0
+    while(current_frame < 90):
+        ret, frame = vid.read()
+        current_frame += 1
+    transformed_frame = camera_setup.perspective_change(frame, camera_setup.dots)
+    transformed_frame = cv2.resize(transformed_frame, (1000, 1000), interpolation=cv2.INTER_LINEAR)
+    cv2.imwrite('scanned_board.png', transformed_frame)
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -44,6 +55,7 @@ class MainWindow(QWidget):
 
         self.setLayout(self.VBL)
 
+
     def load_image_from_fen(self, fen):
         #self.board = chess.Board(fen)
         url = f'https://chess-board.fly.dev/?fen={fen}&size=600&theme=default&frame=false&piece=cburnett'
@@ -61,6 +73,7 @@ class MainWindow(QWidget):
         fen = ''
         if self.game_begin is False:
             self.game_begin = True 
+            '''
             ### This block is simulating taking a picture and scanning the board in its starting position ###
             fen = f'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR {self.current_player}' #starting_fen
             url = f'https://chess-board.fly.dev/?fen={fen}&size=600&theme=default&frame=false&piece=cburnett'
@@ -71,7 +84,9 @@ class MainWindow(QWidget):
                     for chunk in response:
                         f.write(chunk)
             ### End simulation block ###
-            self.detected_board = chess_recognition.generate_board('test.png')
+            '''
+            take_picture()
+            self.detected_board = chess_recognition.generate_board('scanned_board.png')
             fen = chess_recognition.generate_fen(self.detected_board[0], self.current_player)
             self.load_image_from_fen(fen)
         else:
@@ -99,8 +114,10 @@ class MainWindow(QWidget):
             move = self.insert_move_lbl.toPlainText()
             next_player = 'b' #change to cpu player
             
-        board.push_uci(move) #reminder: move to player == b when this uses a camera
+        #board.push_uci(move) #reminder: move to player == b when this uses a camera
         print(board.fen())
+        
+        '''
         ### This block is simulating taking a picture and scanning the board after a move ###
         url = f'https://chess-board.fly.dev/?fen={board.fen()}&size=600&theme=default&frame=false&piece=cburnett'
         print(url)
@@ -110,12 +127,17 @@ class MainWindow(QWidget):
                 for chunk in response:
                     f.write(chunk)
         ### End simulation block ###
-        self.detected_board = chess_recognition.generate_board('test.png')
+        '''
+        take_picture()
+        self.detected_board = chess_recognition.generate_board('scanned_board.png')
         fen = chess_recognition.generate_fen(self.detected_board[0], next_player)
         self.load_image_from_fen(fen)
         self.current_player = next_player
 
 if __name__ == "__main__":
+    dots = camera_setup.main(1)
+    print(dots)
+    print(camera_setup.dots)
     App = QApplication(sys.argv)
     Root = MainWindow()
     Root.show()

@@ -21,7 +21,7 @@ fen_classes = {
     class_names_pieces[6]: 'r',
 }
 
-def predict_color(img_array, size = (85, 85)):
+def predict_color(img_array, size = (224, 224)):
     img_array = cv2.resize(img_array, size)
     img_array = tf.expand_dims(img_array, 0)  # Create batch axis
 
@@ -58,9 +58,9 @@ def get_piece_and_color(img_array):
 
 print(tf.__version__)
 
-model_pieces = tf.keras.models.load_model('./save_at_19.h5')
+model_pieces = tf.keras.models.load_model('./model_pieces_v4.h5')
 model_pieces.summary()
-model_colors = tf.keras.models.load_model('./model_color.h5')
+model_colors = tf.keras.models.load_model('./model_color_v3.h5')
 model_colors.summary()
 
 img = keras.preprocessing.image.load_img(
