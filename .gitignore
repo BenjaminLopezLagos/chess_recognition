@@ -2,5 +2,6 @@
 venv
 .conda
 board_imgs
+board_imgs_1
 kaggle.json
 __pycache__
